@@ -1,16 +1,52 @@
 export {renderContent}
 
+function generateFruitsRandomBoard(size) {
+  const fruitsBoard = Array(size)
+    .fill(0)
+    .map((n,i)=> i>=size-12 ? Math.floor(Math.random()*10) : 0);
+ /* for(let i=size-12; i<size; i++){
+    fruitsBoard[i]=Math.floor(Math.random()*10);
+  }*/
+  return fruitsBoard;
+}
+
+const fruitCellsMap = new Map();
+
 function renderContent(){
-  const fruitsBoard = Array(120).fill(0).map((_,i)=>i)
-    return `
+  const fruitsBoard = generateFruitsRandomBoard(120);
+    const template = `
 <div class="container board-wrapper">
-  <div class="board">
+  <div id="board" class="board">
   ${
-    fruitsBoard.map(f=>`<div class="cell">${f}</div>`).join('')
+    ''
+   /* fruitsBoard.map((f,i)=>`<div 
+      class="cell" 
+      data-fruit="${f}" 
+      data-position="${i}">
+        ${f}
+      </div>`).join('')*/
   }
-  
-   
   </div>
 </div>
     `;
+
+    let wrapper = document.createElement('div');
+    wrapper.innerHTML = template;
+    const divContainer = wrapper.firstElementChild;
+    const divBoard = divContainer.querySelector('#board');
+    fruitsBoard.forEach((f,i)=>{
+      const divCellHTML = `<div 
+      class="cell" 
+      data-fruit="${f}" 
+      data-position="${i}">
+        ${f}
+      </div>`;
+      const divCellWrapper = document.createElement('div');
+      divCellWrapper.innerHTML = divCellHTML;
+      fruitCellsMap.set(divCellWrapper.firstElementChild,{fruit: f,position: i});
+      divBoard.append(divCellWrapper.firstElementChild);
+    });
+
+    return divContainer;
+
 }

@@ -12,7 +12,7 @@ const routes = new Map([
 
 function router(route,container){
     if(routes.has(route)){
-        container.innerHTML = routes.get(route)();
+        container.replaceChildren(routes.get(route)());
     }
     else {
         container.innerHTML = `<h2>404</h2>`
