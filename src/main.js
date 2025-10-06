@@ -15,10 +15,10 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   headerDiv.innerHTML = renderHeader();
   footerDiv.innerHTML = renderFooter();
-  //window.location.hash = "#";
+
   router(window.location.hash, appDiv);
   window.addEventListener("hashchange", () => {
     router(window.location.hash, appDiv);
   });
-  //appDiv.innerHTML = renderContent(Array(120).fill(0).map((_,i)=>i));
+  
 });

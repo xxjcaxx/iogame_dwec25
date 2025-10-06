@@ -13,8 +13,10 @@ function generateFruitsRandomBoard(size) {
 const fruitCellsMap = new Map();
 
 function renderContent(){
+
   const fruitsBoard = generateFruitsRandomBoard(120);
     const template = `
+
 <div class="container board-wrapper">
   <div id="board" class="board">
   ${

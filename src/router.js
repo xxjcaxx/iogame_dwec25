@@ -4,7 +4,7 @@ import { renderLogin } from "./components/login";
 export {router}
 
 const routes = new Map([
-    ['#',renderContent],
+    ['',renderContent],
     ['#game',renderContent],
     ['#login',renderLogin]
 ])
