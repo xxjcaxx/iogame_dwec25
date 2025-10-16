@@ -1,5 +1,8 @@
 export { renderContent };
 
+
+
+
 function generateFruitsRandomBoard(size) {
   const fruitsBoard = Array(size)
     .fill(0)
@@ -9,14 +12,12 @@ function generateFruitsRandomBoard(size) {
 
 function handleClick(fruitsBoard, fruitCellsMap) {
   return function (event) {
+    
     if (event.target.tagName === "DIV" && event.target.dataset.position) {
       let n = Math.floor(Math.random() * 10);
 
-      let column = event.target.dataset.position%12;
-       fruitsBoard[column] = n;
-
-      //fruitsBoard[event.target.dataset.position] = n;
-      refreshCells(fruitsBoard, fruitCellsMap);
+      let column = event.target.dataset.position % 12;
+      fruitsBoard[column] = n;
     }
   };
 }
@@ -45,8 +46,30 @@ function refreshCells(fruitsBoard, fruitCellsMap) {
   });
 }
 
+function gameStep(fruitsBoard) {
+  const newFruitsBoard = structuredClone(fruitsBoard);
+  fruitsBoard.forEach((f,i)=>{
+    if(f !== 0 && fruitsBoard[i+12]===0 ){
+      newFruitsBoard[i]=0;
+      newFruitsBoard[i+12]=f;
+    }
+  });
+  return newFruitsBoard;
+}
+
+function gameLoop(fruitsBoard, fruitCellsMap) {
+  setInterval(() => {
+    fruitsBoard = gameStep(fruitsBoard);
+    refreshCells(fruitsBoard, fruitCellsMap);
+    console.log(JSON.stringify(fruitsBoard));
+    
+  }, 1000);
+
+
+}
+
 function renderContent() {
-  const fruitsBoard = generateFruitsRandomBoard(120);
+  let fruitsBoard = generateFruitsRandomBoard(120);
   const fruitCellsMap = renderCells(fruitsBoard);
 
   const template = `
@@ -62,5 +85,7 @@ function renderContent() {
 
   divBoard.replaceChildren(...fruitCellsMap.values());
   divBoard.addEventListener("click", handleClick(fruitsBoard, fruitCellsMap));
+
+  gameLoop(fruitsBoard, fruitCellsMap);
   return divContainer;
 }
