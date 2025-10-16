@@ -16,6 +16,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   headerDiv.innerHTML = renderHeader();
   footerDiv.innerHTML = renderFooter();
 
+
+
   router(window.location.hash, appDiv);
   window.addEventListener("hashchange", () => {
     router(window.location.hash, appDiv);
