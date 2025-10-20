@@ -6,7 +6,8 @@ export {router}
 const routes = new Map([
     ['',renderContent],
     ['#game',renderContent],
-    ['#login',renderLogin]
+    ['#login',renderLogin('login')],
+    ['#register',renderLogin('register')],
 ])
 
 
