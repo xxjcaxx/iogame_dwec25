@@ -1,5 +1,6 @@
 import { renderContent } from "./components/content";
 import { renderLogin } from "./components/login";
+import { renderProfile } from "./components/profile";
 
 export {router}
 
@@ -8,6 +9,7 @@ const routes = new Map([
     ['#game',renderContent],
     ['#login',renderLogin('login')],
     ['#register',renderLogin('register')],
+    ['#profile',renderProfile]
 ])
 
 

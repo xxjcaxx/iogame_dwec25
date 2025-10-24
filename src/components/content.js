@@ -1,3 +1,5 @@
+import { getData } from "../services/supaservice";
+
 export { renderContent };
 
 
@@ -118,6 +120,8 @@ function renderContent() {
   const divContainer = renderTable(fruitCellsMap);
   divContainer.addEventListener("click", handleClick());
   gameLoop(fruitCellsMap);
+
+  getData('games').then(data=> console.log(data));
 
   return divContainer;
 }

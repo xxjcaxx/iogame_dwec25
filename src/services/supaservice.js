@@ -1,5 +1,5 @@
 import { SUPABASE_KEY, SUPABASE_URL } from "../env";
-export { loginSupabase, registerSupabase, login, register };
+export { loginSupabase, registerSupabase, login, register, getData , updateData, updateProfile};
 /*
 env.js: 
 
@@ -9,15 +9,23 @@ export const SUPABASE_URL = 'https://zjwnfbhnemehixhiupey.supabase.co';
        
 */
 
+const getBearer =()=>{
+    let bearer = localStorage.getItem('access_token');
+    bearer = bearer ? `Bearer ${bearer}` : `Bearer ${SUPABASE_KEY}`;
+    return bearer;
+}
+
 const headerFactory = ({  // Parameter destructuring amb valors per defecte
     apikey = SUPABASE_KEY,
-    Authorization = `Bearer ${SUPABASE_KEY}`,
-    contentType = "application/json"
+    Authorization = getBearer(),
+    contentType = "application/json",
+    Prefer = null
 } = {}) => {
     const headers = new Headers();
     apikey && headers.append("apikey", apikey);
     Authorization && headers.append("Authorization", Authorization);
     contentType && headers.append("Content-Type", contentType);
+    Prefer && headers.append("Prefer",Prefer)
     return headers;
 }
 
@@ -74,4 +82,48 @@ const login = async (dataLogin)=>{
 
 const register = async (dataRegister)=>{
     const registerResponse = await registerSupabase(dataRegister);
+    return registerResponse;
+}
+
+const getData = async (table, query) => {
+    const data = await fetchSupabase(`${SUPABASE_URL}/rest/v1/${table}?select=*`, {
+            method: "get",
+            headers: headerFactory({}),
+        });
+    return data;
+}
+
+const updateData = async(table,id,data) =>{
+    console.log(table,id,data);
+    
+     const result = await fetchSupabase(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+            method: "PATCH",
+            headers: headerFactory({Prefer: "return=representation"}),
+            body: JSON.stringify(data)
+        });
+    return result;
+}
+
+const updateProfile = async(id,data) =>{
+    console.log(id,data);
+    
+    const avatarFile = data.avatar;
+    console.log(avatarFile);
+    let formImg = new FormData();
+    formImg.append("avatar", avatarFile, avatarFile.name);
+    console.log(formImg);
+    const headers = headerFactory({contentType:null});
+    headers.append("x-upsert", true);
+
+    const response = await fetch(`${SUPABASE_URL}/storage/v1/object/avatars/${avatarFile.name}`, {
+                method: 'POST',
+                headers: headers,
+                body: formImg
+    });
+    const avatarInfo = await response.json();
+    data.avatar_url = avatarInfo.Key;
+    delete data.avatar;
+
+    updateData('profiles',id,data)
+    
 }

@@ -30,7 +30,6 @@ const  renderLogin =(method)=> ()=> {
       event.preventDefault();
       const formData = new FormData(form);
       const dataLogin = Object.fromEntries(formData);
-      console.log(dataLogin);
       if (method === "login") {
         login(dataLogin);
       } else {

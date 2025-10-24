@@ -28,7 +28,7 @@ function renderHeader(){
             <span>User</span>
           </a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-            <li><a class="dropdown-item" href="#">Preferenes</a></li>
+            <li><a class="dropdown-item" href="#profile">Profile</a></li>
             <li><a class="dropdown-item" href="#">Logout</a></li>
       
           </ul>
