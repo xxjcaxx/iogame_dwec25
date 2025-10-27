@@ -1,6 +1,6 @@
 export { renderProfile };
 
-import { getData, updateData, updateProfile } from "../services/supaservice";
+import { getData, getImage, updateData, updateProfile } from "../services/supaservice";
 
 
 const renderProfile = () => {
@@ -41,11 +41,12 @@ const renderProfile = () => {
 
   const previAvatar = divProfile.querySelector('#previAvatar');
   const inputAvatar = divProfile.querySelector('#avatar');
-  inputAvatar.addEventListener('change',()=>{
+  inputAvatar.addEventListener('change', () => {
     const file = inputAvatar.files[0];
     const fileURL = URL.createObjectURL(file);
     previAvatar.src = fileURL;
   });
+
 
   const form = divProfile.querySelector("form");
   form.addEventListener("submit", async (event) => {
@@ -64,7 +65,13 @@ const renderProfile = () => {
     const profileData = await getData("profiles");
 
     divProfile.querySelector("#username").value = profileData[0].username;
+    divProfile.querySelector("#full_name").value = profileData[0].full_name;
+    divProfile.querySelector("#avatar_url").value = profileData[0].avatar_url;
+    divProfile.querySelector("#website").value = profileData[0].website;
+
+    divProfile.querySelector("#previAvatar").src = await getImage(profileData[0].avatar_url);
     id = profileData[0].id;
+
   };
 
   refreshData();
