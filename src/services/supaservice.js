@@ -1,7 +1,7 @@
 import { SUPABASE_KEY, SUPABASE_URL } from "../env";
 export { loginSupabase, registerSupabase, login, 
     register, getData, updateData, updateProfile,
-    getImage
+    getImage, getSession
  };
 /*
 env.js: 
@@ -80,7 +80,12 @@ const login = async (dataLogin) => {
     localStorage.setItem('refresh_token', loginResponse.refresh_token);
     localStorage.setItem('expires_in', loginResponse.expires_in);
     localStorage.setItem('user', loginResponse.user.email);
+    localStorage.setItem('user_id', loginResponse.user.id);
     return loginResponse;
+}
+
+const getSession = ()=>{
+    return localStorage.getItem('user_id');
 }
 
 const register = async (dataRegister) => {
@@ -89,7 +94,8 @@ const register = async (dataRegister) => {
 }
 
 const getData = async (table, query) => {
-    const data = await fetchSupabase(`${SUPABASE_URL}/rest/v1/${table}?select=*`, {
+    const supaquery = `&id=eq.${query.id}`
+    const data = await fetchSupabase(`${SUPABASE_URL}/rest/v1/${table}?select=*${supaquery}`, {
         method: "get",
         headers: headerFactory({}),
     });

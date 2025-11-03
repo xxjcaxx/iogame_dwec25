@@ -1,6 +1,6 @@
 export { renderProfile };
 
-import { getData, getImage, updateData, updateProfile } from "../services/supaservice";
+import { getData, getImage, getSession, updateData, updateProfile } from "../services/supaservice";
 
 
 const renderProfile = () => {
@@ -62,7 +62,8 @@ const renderProfile = () => {
   });
 
   const refreshData = async () => {
-    const profileData = await getData("profiles");
+    const user_id = getSession()
+    const profileData = await getData("profiles",{id: user_id});
 
     divProfile.querySelector("#username").value = profileData[0].username;
     divProfile.querySelector("#full_name").value = profileData[0].full_name;
