@@ -1,3 +1,4 @@
+import { generateFruitsRandomBoard, gameStep } from "../gameLogic";
 import { getData } from "../services/supaservice";
 
 export { renderContent };
@@ -7,23 +8,6 @@ export { renderContent };
 
 ///////////// Funcions totalment pures
 
-function generateFruitsRandomBoard(size) {
-  let fruitsBoard = Array(size)
-    .fill(0)
-    .map((n, i) => (i >= size - 12 ? Math.floor(Math.random() * 10) : 0));
-  return fruitsBoard;
-}
-
-function gameStep(fruitsBoard) {
-  const newFruitsBoard = structuredClone(fruitsBoard);
-  fruitsBoard.forEach((f, i) => {
-    if (f !== 0 && fruitsBoard[i + 12] === 0) {
-      newFruitsBoard[i] = 0;
-      newFruitsBoard[i + 12] = f;
-    }
-  });
-  return newFruitsBoard;
-}
 
 function update(fruitsBoard, action) {
   if (action.type === "CLICK_CELL") {
@@ -97,7 +81,7 @@ function renderContent() {
       fruitsBoard = update(fruitsBoard, action);
       refreshCells(fruitsBoard, fruitCellsMap);
       console.log(JSON.stringify(fruitsBoard));
-    }, 1000);
+    }, 100);
   }
 
   // Efecte: Atenció d'esdeveniment, modificació de variable global
