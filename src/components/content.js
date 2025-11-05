@@ -17,7 +17,11 @@ function update(fruitsBoard, action) {
     return newBoard;
   }
   if (action.type === "STEP") {
-    return gameStep(fruitsBoard);
+    const {fruitsBoard: newFruitsBoard, changes} =  gameStep(fruitsBoard);
+    if(changes > 0){
+      
+    }
+    return newFruitsBoard;
   }
 }
 
@@ -70,6 +74,7 @@ function renderContent() {
     fruitsBoard.forEach((f, i) => {
       if (fruitCellsMap.get(i).textContent != f) {
         fruitCellsMap.get(i).textContent = f;
+        fruitCellsMap.get(i).dataset.fruit = f;
       }
     });
   }
