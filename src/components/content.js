@@ -1,5 +1,7 @@
 import { generateFruitsRandomBoard, gameStep } from "../gameLogic";
 import { getData } from "../services/supaservice";
+import { compose } from "../functionals";
+import { BehaviorSubject, from, fromEvent, interval, map, withLatestFrom, merge, filter, tap, distinct, distinctUntilChanged } from "rxjs";
 
 export { renderContent };
 
@@ -13,15 +15,15 @@ function update(fruitsBoard, action) {
   if (action.type === "CLICK_CELL") {
     const newBoard = structuredClone(fruitsBoard);
     const column = action.position % 12;
-    newBoard[column] = Math.floor(Math.random() * 10);
+    newBoard[column] = Math.floor(Math.random() * 16);
     return newBoard;
   }
   if (action.type === "STEP") {
-    const {fruitsBoard: newFruitsBoard, changes} =  gameStep(fruitsBoard);
-    if(changes > 0){
-      
+    const { fruitsBoard: newFruitsBoard, changes } = gameStep(fruitsBoard);
+    if (changes > 0) {
+      return newFruitsBoard;
     }
-    return newFruitsBoard;
+    return fruitsBoard;
   }
 }
 
@@ -59,13 +61,33 @@ function renderCells(fruitsBoard) {
   return fruitCellsMap;
 }
 
+function gameLoop() {
+  return interval(100).pipe(
+    map(() => {
+      const action = { type: "STEP" };
+      return action;
+    }))
+}
+
+function handleClick(event) {
+  if (event.target.tagName === "DIV" && event.target.dataset.position) {
+    const action = {
+      type: "CLICK_CELL",
+      position: parseInt(event.target.dataset.position),
+    };
+    return action;
+  }
+  return null;
+}
+
+
 
 
 
 function renderContent() {
   ////////// Estat Global controlat (closure d'aquesta funció)
 
-  let fruitsBoard = [];
+  const fruitsBoardSubject = new BehaviorSubject([]);
 
   ///// Funcions amb efectes col·laterals controlats
 
@@ -79,38 +101,32 @@ function renderContent() {
     });
   }
 
-  // Efecte col·lateral: Modificació de variable global i cridada a modificació del DOM
-  function gameLoop(fruitCellsMap) {
-    setInterval(() => {
-      const action = { type: "STEP" };
-      fruitsBoard = update(fruitsBoard, action);
-      refreshCells(fruitsBoard, fruitCellsMap);
-      console.log(JSON.stringify(fruitsBoard));
-    }, 100);
-  }
-
-  // Efecte: Atenció d'esdeveniment, modificació de variable global
-  function handleClick() {
-    return function (event) {
-      if (event.target.tagName === "DIV" && event.target.dataset.position) {
-        const action = {
-          type: "CLICK_CELL",
-          position: parseInt(event.target.dataset.position),
-        };
-        fruitsBoard = update(fruitsBoard, action);
-      }
-    };
-  }
 
   // Codi principal (main)
 
-  fruitsBoard = generateFruitsRandomBoard(120);
-  const fruitCellsMap = renderCells(fruitsBoard);
-  const divContainer = renderTable(fruitCellsMap);
-  divContainer.addEventListener("click", handleClick());
-  gameLoop(fruitCellsMap);
+  const fruitsBoardInit = generateFruitsRandomBoard(120);
+   fruitsBoardSubject.next(fruitsBoardInit);
+   const fruitCellsMap = renderCells(fruitsBoardInit);
+   const divContainer = renderTable(fruitCellsMap);
 
-  getData('games').then(data=> console.log(data));
+ // Els observables
+  const click$ = fromEvent(divContainer, "click").pipe(map((event) => handleClick(event)));
+  const gameLoop$ = gameLoop();
+  const gameLoopEventsMerged$ = merge(click$, gameLoop$);
+
+  // implementació del bucle:
+  let i =0;
+  gameLoopEventsMerged$.pipe(
+    filter(action => action !== null),   // filter(Boolean)
+    withLatestFrom(fruitsBoardSubject),
+    map(([action, fruitsBoard]) => update(fruitsBoard, action)),
+    distinctUntilChanged(),
+     tap(fruitsBoard => console.log(fruitsBoard, i++))
+  ).subscribe(fruitsBoardSubject);
+
+  // Refrescar a cada pas
+  fruitsBoardSubject.subscribe(fruitsBoard => refreshCells(fruitsBoard, fruitCellsMap));
+  //getData('games').then(data => console.log(data));
 
   return divContainer;
 }

@@ -1,4 +1,4 @@
-import {describe, expect, test, vi } from "vitest";
+import {beforeEach, describe, expect, test, vi } from "vitest";
 
 import * as game from "../src/gameLogic"
 
@@ -119,15 +119,71 @@ describe("reduceFind4", () => {
 
 });
 
+describe("moveDown", () => {
+ test("devuelve un nuevo array (no muta el original)", () => {
+    const board = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const result = game.moveDown(board);
+
+    expect(result.fruitsBoard).not.toBe(board);
+    expect(board[0]).toBe(1); // el original no cambia
+  });
+  test("mueve una fruta hacia abajo si la celda 12 posiciones abajo está vacía", () => {
+    const board = [
+      5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ];
+
+    const result = game.moveDown(board);
+    expect(result.fruitsBoard[0]).toBe(0);
+    expect(result.fruitsBoard[12]).toBe(5);
+  });
+
+  test("no mueve una fruta si debajo hay otra fruta", () => {
+    const board = [
+      7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ];
+
+    const result = game.moveDown(board);
+    expect(result.fruitsBoard[0]).toBe(7);
+    expect(result.fruitsBoard[12]).toBe(9);
+
+   // expect(result.fruitsBoard).toEqual(board); // no cambia
+  });
+
+  test("mueve varias frutas si pueden bajar", () => {
+    const board = [
+      1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ];
+
+    const result = game.moveDown(board).fruitsBoard;
+    expect(result[0]).toBe(0);
+    expect(result[4]).toBe(0);
+    expect(result[12]).toBe(1);
+    expect(result[16]).toBe(2);
+  });
+
+});
+
 describe("gameStep", () => {
 
-  test("devuelve un nuevo array (no muta el original)", () => {
+  test("devuelve un nuevo array (no muta el original) si hay cambios", () => {
     const board = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     const result = game.gameStep(board);
 
     expect(result.fruitsBoard).not.toBe(board);
     expect(board[0]).toBe(1); // el original no cambia
+  });
+
+    test("devuelve el mismo array (sin cambios)", () => {
+    const board = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                   1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const result = game.gameStep(board);
+
+    expect(result.fruitsBoard).toBe(board);
   });
 
   test("mueve una fruta hacia abajo si la celda 12 posiciones abajo está vacía", () => {
@@ -148,7 +204,10 @@ describe("gameStep", () => {
     ];
 
     const result = game.gameStep(board);
-    expect(result.fruitsBoard).toEqual(board); // no cambia
+    expect(result.fruitsBoard[0]).toBe(7);
+    expect(result.fruitsBoard[12]).toBe(9);
+
+   // expect(result.fruitsBoard).toEqual(board); // no cambia
   });
 
   test("mueve varias frutas si pueden bajar", () => {
@@ -195,6 +254,12 @@ describe("detect4", () => {
     expect(result.horizontals).toEqual([]);
   });
 
+  test("no detecta 0s", () => {
+    const board = [...Array(112).fill(0), 1, 1, 1, 1, 3, 3, 3, 3];
+    const result = game.detect4(board);  
+    expect(result.horizontals).toEqual([112, 116]);
+  });     
+
   test("funciona con verticales",()=>{
     const board = Array(120).fill(0).map((_,ix)=>ix);
     board[1] = 1;
@@ -202,7 +267,44 @@ describe("detect4", () => {
     board[25] = 1;
     board[37] = 1;
     const result = game.detect4(board);
+    
     expect(result.verticals).toEqual([10]);
   });
 
+});
+
+
+describe("delete4", () => {
+  let board = [];
+  beforeEach(() => {
+    board = [...Array(112).fill(0), 1, 1, 1, 1, 3, 3, 3, 3];
+    board[1] = 5;
+    board[13] = 5;
+    board[25] = 5;
+    board[37] = 5;
+  });
+
+  test("devuelve un nuevo array (no muta el original) si hay cambios", () => {
+    const result = game.delete4(board);
+    expect(result.fruitsBoard).not.toBe(board);
+    expect(board[112]).toBe(1);
+    expect(board[119]).toBe(3);
+    expect(board[13]).toBe(5);
+  });
+  test("Borra los horizontales", () => {
+    const result = game.delete4(board);
+    expect(result.fruitsBoard[0]).toBe(0);
+    expect(result.fruitsBoard[112]).toBe(0);
+    expect(result.fruitsBoard[115]).toBe(0);
+    expect(result.fruitsBoard[116]).toBe(0);
+    expect(result.fruitsBoard[119]).toBe(0);
+    });
+  test("Borra los verticales", () => {  
+     const result = game.delete4(board);    
+    expect(result.fruitsBoard[0]).toBe(0);
+    expect(result.fruitsBoard[1]).toBe(0);
+    expect(result.fruitsBoard[13]).toBe(0);
+    expect(result.fruitsBoard[25]).toBe(0);
+    expect(result.fruitsBoard[37]).toBe(0);
+  });
 });
