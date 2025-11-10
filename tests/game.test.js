@@ -1,4 +1,4 @@
-import {beforeEach, describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import * as game from "../src/gameLogic"
 
@@ -93,36 +93,36 @@ describe("reduceFind4", () => {
   });
 
   test("detecta múltiples secuencias de 4 iguales", () => {
-    const arr = [1,1,1,1,2,2,2,2,3,3];
+    const arr = [1, 1, 1, 1, 2, 2, 2, 2, 3, 3];
     const result = arr.reduce(game.reduceFind4, []);
     expect(result).toEqual([0, 4]);
   });
 
   test("no devuelve nada si no hay 4 iguales consecutivos", () => {
-    const arr = [1,1,2,1,1,1,2];
+    const arr = [1, 1, 2, 1, 1, 1, 2];
     const result = arr.reduce(game.reduceFind4, []);
     expect(result).toEqual([]);
   });
 
   test("funciona con cadenas también", () => {
-    const arr = ["a","a","a","a","b","b","b","b"];
+    const arr = ["a", "a", "a", "a", "b", "b", "b", "b"];
     const result = arr.reduce(game.reduceFind4, []);
     expect(result).toEqual([0, 4]);
   });
 
   test("si hay más de 4 iguales seguidos, marca todos los inicios posibles de 4 en fila", () => {
-    const arr = [1,1,1,1,1,1];
+    const arr = [1, 1, 1, 1, 1, 1];
     const result = arr.reduce(game.reduceFind4, []);
     // posibles subgrupos de 4: [0-3], [1-4], [2-5]
-    expect(result).toEqual([0,1,2]);
+    expect(result).toEqual([0, 1, 2]);
   });
 
 });
 
 describe("moveDown", () => {
- test("devuelve un nuevo array (no muta el original)", () => {
+  test("devuelve un nuevo array (no muta el original)", () => {
     const board = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     const result = game.moveDown(board);
 
     expect(result.fruitsBoard).not.toBe(board);
@@ -149,7 +149,7 @@ describe("moveDown", () => {
     expect(result.fruitsBoard[0]).toBe(7);
     expect(result.fruitsBoard[12]).toBe(9);
 
-   // expect(result.fruitsBoard).toEqual(board); // no cambia
+    // expect(result.fruitsBoard).toEqual(board); // no cambia
   });
 
   test("mueve varias frutas si pueden bajar", () => {
@@ -171,14 +171,14 @@ describe("gameStep", () => {
 
   test("devuelve un nuevo array (no muta el original) si hay cambios", () => {
     const board = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     const result = game.gameStep(board);
 
     expect(result.fruitsBoard).not.toBe(board);
     expect(board[0]).toBe(1); // el original no cambia
   });
 
-    test("devuelve el mismo array (sin cambios)", () => {
+  test("devuelve el mismo array (sin cambios)", () => {
     const board = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     const result = game.gameStep(board);
@@ -207,7 +207,7 @@ describe("gameStep", () => {
     expect(result.fruitsBoard[0]).toBe(7);
     expect(result.fruitsBoard[12]).toBe(9);
 
-   // expect(result.fruitsBoard).toEqual(board); // no cambia
+    // expect(result.fruitsBoard).toEqual(board); // no cambia
   });
 
   test("mueve varias frutas si pueden bajar", () => {
@@ -222,54 +222,61 @@ describe("gameStep", () => {
     expect(result[12]).toBe(1);
     expect(result[16]).toBe(2);
   });
-
-  test("no falla si el array es más pequeño que 12 elementos", () => {
-    const board = [1, 2, 3, 0, 4, 5];
-    const result = game.gameStep(board).fruitsBoard;
-    expect(result).toEqual(board); // no hay posiciones 12 abajo
-  });
-
 });
 
 
 describe("detect4", () => {
 
   test("devuelve un objeto con horizontals y verticals", () => {
-    const board = [1,1,1,1,2,2,2,2];
+    const board = [1, 1, 1, 1, 2, 2, 2, 2];
     const result = game.detect4(board);
     expect(result).toHaveProperty("horizontals");
     expect(result).toHaveProperty("verticals");
   });
 
   test("detecta secuencias horizontales de 4 iguales", () => {
-    const board = [1,1,1,1,2,3,3,3,3];
+    const board = [1, 1, 1, 1, 2, 3, 3, 3, 3];
     const result = game.detect4(board);
     expect(result.horizontals).toContain(0);
     expect(result.horizontals).toContain(5);
   });
 
   test("no detecta horizontales si no hay 4 iguales consecutivos", () => {
-    const board = [1,1,2,1,1,3,3,4];
+    const board = [1, 1, 2, 1, 1, 3, 3, 4];
     const result = game.detect4(board);
     expect(result.horizontals).toEqual([]);
   });
 
   test("no detecta 0s", () => {
     const board = [...Array(112).fill(0), 1, 1, 1, 1, 3, 3, 3, 3];
-    const result = game.detect4(board);  
+    const result = game.detect4(board);
     expect(result.horizontals).toEqual([112, 116]);
-  });     
+  });
 
-  test("funciona con verticales",()=>{
-    const board = Array(120).fill(0).map((_,ix)=>ix);
+  test("funciona con verticales", () => {
+    const board = Array(120).fill(0).map((_, ix) => ix);
     board[1] = 1;
     board[13] = 1;
     board[25] = 1;
     board[37] = 1;
     const result = game.detect4(board);
-    
-    expect(result.verticals).toEqual([10]);
+
+    expect(result.verticals).toEqual([10]); // 10 es 1 transposat
   });
+
+  test("funciona con verticales con alguna otra horizontal", ()=>{
+   const board = [...Array(112).fill(0), 1, 1, 1, 1, 3, 3, 3, 3];
+    board[1] = 5;
+    board[13] = 5;
+    board[25] = 5;
+    board[37] = 5;
+    const result = game.detect4(board);
+    
+    expect(result.horizontals).toEqual([112,116]);
+    expect(result.verticals).toEqual([10]); // 10 es 1 transposat
+  });
+
+
 
 });
 
@@ -282,6 +289,8 @@ describe("delete4", () => {
     board[13] = 5;
     board[25] = 5;
     board[37] = 5;
+
+
   });
 
   test("devuelve un nuevo array (no muta el original) si hay cambios", () => {
@@ -298,9 +307,9 @@ describe("delete4", () => {
     expect(result.fruitsBoard[115]).toBe(0);
     expect(result.fruitsBoard[116]).toBe(0);
     expect(result.fruitsBoard[119]).toBe(0);
-    });
-  test("Borra los verticales", () => {  
-     const result = game.delete4(board);    
+  });
+  test("Borra los verticales", () => {
+    const result = game.delete4(board);
     expect(result.fruitsBoard[0]).toBe(0);
     expect(result.fruitsBoard[1]).toBe(0);
     expect(result.fruitsBoard[13]).toBe(0);

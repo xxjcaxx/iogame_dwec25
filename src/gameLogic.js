@@ -1,4 +1,4 @@
-export { generateFruitsRandomBoard, gameStep, detect4, transpose, reduceFind4, moveDown, delete4}
+export { generateFruitsRandomBoard, gameStep, detect4, transpose, reduceFind4, moveDown, delete4 }
 
 function generateFruitsRandomBoard(size) {
   let fruitsBoard = Array(size)
@@ -16,7 +16,7 @@ const transpose = (rows, cols) => (arr) => {
 }
 
 const reduceFind4 = (res, a, idx, arr) => {
-  if (idx >= 3 && a !== 0) {
+  if (idx >= 3 && Boolean(a)) {
     const sub = [arr[idx - 3], arr[idx - 2], arr[idx - 1], a];
     sub.every(i => i === a) && res.push(idx - 3);
   }
@@ -42,19 +42,27 @@ const moveDown = (fruitsBoard) => {
       changes += 1
     }
   });
-  return { fruitsBoard: newFruitsBoard, changes }; 
+  return { fruitsBoard: newFruitsBoard, changes };
 }
 
 const delete4 = (fruitsBoard) => {
   // Si troba 4 en línia amb les funcions anteriors els elimina posant-los a 0
   const { horizontals, verticals } = detect4(fruitsBoard);
+  const posOriginalDesdeTranspuesta = pT => (pT % 10) * 12 + Math.floor(pT / 10);
+  //console.log(fruitsBoard);
   
+  //console.log(horizontals,verticals);
+  
+
   if (horizontals.length > 0 || verticals.length > 0) {
-    const newFruitsBoard = structuredClone(fruitsBoard); 
-    const positions = [...horizontals.map(h => ([h, h + 1, h + 2, h + 3])),
-    ...verticals.map(v => [v, v + 12, v + 24, v + 36])].flat();
-    console.log(positions);
-    
+    const newFruitsBoard = structuredClone(fruitsBoard);
+    const horizontalPositions = horizontals.map(h => ([h, h + 1, h + 2, h + 3]));
+    const verticalPositions = verticals
+      .map(posOriginalDesdeTranspuesta)
+      .map(v => [v, v + 12, v + 24, v + 36]);
+    const positions = [...horizontalPositions, ...verticalPositions].flat();
+    //console.log(horizontalPositions, verticalPositions);
+
     positions.forEach(pos => newFruitsBoard[pos] = 0);
     return { fruitsBoard: newFruitsBoard, changes: 1 };
   }
@@ -64,7 +72,7 @@ const delete4 = (fruitsBoard) => {
 
 function gameStep(fruitsBoard) {
   const { fruitsBoard: newFruitsBoard, changes } = moveDown(fruitsBoard);
-
+  
   if (changes === 0) {
     const { fruitsBoard: newDeleteFruitsBoard, changes: deleteChanges } = delete4(newFruitsBoard);
     if (deleteChanges === 0) {
