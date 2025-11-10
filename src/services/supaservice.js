@@ -1,5 +1,8 @@
+
+
 import { SUPABASE_KEY, SUPABASE_URL } from "../env";
-export { loginSupabase, registerSupabase, login, 
+export { getBearer, headerFactory, fetchSupabase, 
+    loginSupabase, registerSupabase, login, 
     register, getData, updateData, updateProfile,
     getImage, getSession
  };
@@ -44,10 +47,8 @@ const fetchSupabase = async (url, options) => {
             const error = await response.json();
             throw error;
         }
-
     }
     catch (error) {
-        console.log(error);
         throw error;
     }
 }
