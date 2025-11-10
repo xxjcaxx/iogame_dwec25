@@ -1,4 +1,4 @@
-export { generateFruitsRandomBoard, gameStep, detect4, transpose, reduceFind4, moveDown, delete4 }
+export { generateFruitsRandomBoard, gameStep, detect4, transpose, reduceFind4, moveDown, delete4, updateGame }
 
 function generateFruitsRandomBoard(size) {
   let fruitsBoard = Array(size)
@@ -84,5 +84,21 @@ function gameStep(fruitsBoard) {
   return { fruitsBoard: newFruitsBoard, changes };
 }
 
+
+function updateGame(fruitsBoard, action) {
+  if (action.type === "CLICK_CELL") {
+    const newBoard = structuredClone(fruitsBoard);
+    const column = action.position % 12;
+    newBoard[column] = action.fruit//Math.floor(Math.random() * 16);
+    return newBoard;
+  }
+  if (action.type === "STEP") {
+    const { fruitsBoard: newFruitsBoard, changes } = gameStep(fruitsBoard);
+    if (changes > 0) {
+      return newFruitsBoard;
+    }
+    return fruitsBoard;
+  }
+}
 
 
