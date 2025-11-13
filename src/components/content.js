@@ -3,6 +3,8 @@ import { getData } from "../services/supaservice";
 import { compose } from "../functionals";
 import { BehaviorSubject, from, fromEvent, interval, map, withLatestFrom, merge, filter, tap, distinct, distinctUntilChanged } from "rxjs";
 
+import { fruitsImgs } from "./fruits";
+
 export { renderContent };
 
 
@@ -67,13 +69,20 @@ function handleClick(event,nextFruit) {
 
 const renderNextFruits = (nextFruits) => {
   const divNextFruits = document.createElement("div");
+  divNextFruits.classList.add("nextFruitsContainer")
   divNextFruits.innerHTML = nextFruits.map(
-    f => `<div class="nextFruit" data-fruit="${f}"></div>`
+    f => `<div class="nextFruit" data-fruit="${f}">
+    <img src="${fruitsImgs["fruit"+(f)]}">
+    </div>`
   ).join('')
   return divNextFruits;
 }
 
-
+const moveNextFruits = (nextFruits) =>{
+  const currentNextFruits = [...nextFruits.getValue()];
+  currentNextFruits.pop();
+  
+}
 
 
 function renderContent() {
@@ -102,8 +111,11 @@ function renderContent() {
    const divContainer = renderTable(fruitCellsMap);
 
  // Els observables
-  const nextFruits = new BehaviorSubject(Array.from({ length: 5 }, ()=> Math.floor(Math.random() * 16)));
-  const click$ = fromEvent(divContainer, "click").pipe(map((event) => handleClick(event,1)));
+  const nextFruits = new BehaviorSubject(Array.from({ length: 5 }, ()=> 1+Math.floor(Math.random() * 15)));
+  const click$ = fromEvent(divContainer, "click").pipe(
+    map((event) => handleClick(event,nextFruits.getValue()[4])),
+    tap(()=>{moveNextFruits(nextFruits)})
+  );
   const gameLoop$ = gameLoop();
   const gameLoopEventsMerged$ = merge(click$, gameLoop$);
 
