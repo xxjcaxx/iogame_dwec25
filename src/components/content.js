@@ -81,7 +81,7 @@ const renderNextFruits = (nextFruits) => {
 const moveNextFruits = (nextFruits) =>{
   const currentNextFruits = [...nextFruits.getValue()];
   currentNextFruits.pop();
-  
+  nextFruits.next([1+Math.floor(Math.random() * 15), ...currentNextFruits]);
 }
 
 
@@ -112,8 +112,13 @@ function renderContent() {
 
  // Els observables
   const nextFruits = new BehaviorSubject(Array.from({ length: 5 }, ()=> 1+Math.floor(Math.random() * 15)));
-  const click$ = fromEvent(divContainer, "click").pipe(
+ /* const click$ = fromEvent(divContainer, "click").pipe(
     map((event) => handleClick(event,nextFruits.getValue()[4])),
+    tap(()=>{moveNextFruits(nextFruits)})
+  );*/
+   const click$ = fromEvent(divContainer, "click").pipe(
+    withLatestFrom(nextFruits),
+    map(([event,next]) => handleClick(event,next[4])),
     tap(()=>{moveNextFruits(nextFruits)})
   );
   const gameLoop$ = gameLoop();
@@ -132,7 +137,6 @@ function renderContent() {
   // Refrescar a cada pas
   fruitsBoardSubject.subscribe(fruitsBoard => refreshCells(fruitsBoard, fruitCellsMap));
   nextFruits.subscribe(nextFruits => {
-    console.log(nextFruits);
     divContainer.querySelector("#gameData").replaceChildren(renderNextFruits(nextFruits));
   });
   //getData('games').then(data => console.log(data));
