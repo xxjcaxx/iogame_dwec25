@@ -5,7 +5,7 @@ import "./components/gamesList/gamesList";
 // eslint-disable-next-line
 import * as bootstrap from 'bootstrap'
 
-import { renderHeader } from "./components/header"
+import  "./components/headerComponent/header";
 import { renderContent } from "./components/content";
 import { renderFooter } from "./components/footer";
 
@@ -14,7 +14,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   const headerDiv = document.querySelector('#header');
   const footerDiv = document.querySelector('#footer');
 
-  headerDiv.innerHTML = renderHeader();
+  //headerDiv.innerHTML = renderHeader();
+ // headerDiv.innerHTML = `<game-header></game-header>`
   footerDiv.innerHTML = renderFooter();
 
 

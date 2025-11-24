@@ -43,4 +43,5 @@ class gamesList extends HTMLElement {
         }); 
     }
 }
+
 customElements.define('game-gameslist', gamesList);

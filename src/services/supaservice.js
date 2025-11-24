@@ -1,5 +1,4 @@
-
-
+import { BehaviorSubject } from "rxjs";
 import { SUPABASE_KEY, SUPABASE_URL } from "../env";
 export { getBearer, headerFactory, fetchSupabase, 
     loginSupabase, registerSupabase, login, 
@@ -14,6 +13,8 @@ export  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzd
 export const SUPABASE_URL = 'https://zjwnfbhnemehixhiupey.supabase.co';
        
 */
+
+export const userSubject$ = new BehaviorSubject({});
 
 const getBearer = () => {
     let bearer = localStorage.getItem('access_token');
@@ -82,6 +83,12 @@ const login = async (dataLogin) => {
     localStorage.setItem('expires_in', loginResponse.expires_in);
     localStorage.setItem('user', loginResponse.user.email);
     localStorage.setItem('user_id', loginResponse.user.id);
+    const userData = (await getData("profiles",{id: loginResponse.user.id}))[0]; //{...loginResponse};
+    console.log(userData);
+    
+    userData.imgSRC = await getImage(userData.avatar_url);
+    userData.loginData = loginResponse;
+    userSubject$.next(userData)
     return loginResponse;
 }
 

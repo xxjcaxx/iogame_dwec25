@@ -1,4 +1,30 @@
-export {renderHeader}
+import style from './styleHeader.css?inline';
+import html from './header.html?raw';
+import { userSubject$ } from '../../services/supaservice';
+
+class HeaderComponent extends HTMLElement {
+  connectedCallback() {
+   /* const host = document.createElement("div");
+    this.append(host);
+    const shadow = host.attachShadow({ mode: "closed" });
+  
+    shadow*/
+    const contentHTML = document.createElement('div');
+    contentHTML.innerHTML = html;
+    const styleElement = document.createElement('style');
+    styleElement.innerText = style;
+    this.append(styleElement,contentHTML.firstElementChild);
+    
+    userSubject$.subscribe(data=> {
+      const avatarImg = this.querySelector('#avatarImg');
+      avatarImg.src = data.imgSRC;
+    })
+  }
+}
+
+customElements.define("game-header", HeaderComponent);
+
+/*export {renderHeader}
 
 
 function renderHeader(){
@@ -38,4 +64,4 @@ function renderHeader(){
   </div>
 </nav>
     `;
-}
+}*/
