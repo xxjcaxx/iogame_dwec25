@@ -1,7 +1,9 @@
-import { generateFruitsRandomBoard, gameStep } from "../gameLogic";
+import { generateFruitsRandomBoard, gameStep, updateGame } from "../gameLogic";
 import { getData } from "../services/supaservice";
 import { compose } from "../functionals";
 import { BehaviorSubject, from, fromEvent, interval, map, withLatestFrom, merge, filter, tap, distinct, distinctUntilChanged, debounceTime } from "rxjs";
+
+import { fruitsImgs } from "./fruits";
 
 export { renderContent };
 
@@ -11,26 +13,10 @@ export { renderContent };
 ///////////// Funcions totalment pures
 
 
-function update(fruitsBoard, action) {
-  if (action.type === "CLICK_CELL") {
-    const newBoard = structuredClone(fruitsBoard);
-    const column = action.position % 12;
-    newBoard[column] = Math.floor(Math.random() * 16);
-    return newBoard;
-  }
-  if (action.type === "STEP") {
-    const { fruitsBoard: newFruitsBoard, changes } = gameStep(fruitsBoard);
-    if (changes > 0) {
-      return newFruitsBoard;
-    }
-    return fruitsBoard;
-  }
-}
-
-
 function renderTable(fruitCellsMap) {
   const template = `
         <div class="container board-wrapper">
+          <div id="gameData" class="gameData"></div>
           <div id="board" class="board">
           </div>
         </div>
@@ -69,19 +55,34 @@ function gameLoop() {
     }))
 }
 
-function handleClick(event) {
+function handleClick(event,nextFruit) {
   if (event.target.tagName === "DIV" && event.target.dataset.position) {
     const action = {
       type: "CLICK_CELL",
       position: parseInt(event.target.dataset.position),
+      fruit: nextFruit
     };
     return action;
   }
   return null;
 }
 
+const renderNextFruits = (nextFruits) => {
+  const divNextFruits = document.createElement("div");
+  divNextFruits.classList.add("nextFruitsContainer")
+  divNextFruits.innerHTML = nextFruits.map(
+    f => `<div class="nextFruit" data-fruit="${f}">
+    <img src="${fruitsImgs["fruit"+(f)]}">
+    </div>`
+  ).join('')
+  return divNextFruits;
+}
 
-
+const moveNextFruits = (nextFruits) =>{
+  const currentNextFruits = [...nextFruits.getValue()];
+  currentNextFruits.pop();
+  nextFruits.next([1+Math.floor(Math.random() * 15), ...currentNextFruits]);
+}
 
 
 function renderContent() {
@@ -110,7 +111,16 @@ function renderContent() {
    const divContainer = renderTable(fruitCellsMap);
 
  // Els observables
-  const click$ = fromEvent(divContainer, "click").pipe(map((event) => handleClick(event)));
+  const nextFruits = new BehaviorSubject(Array.from({ length: 5 }, ()=> 1+Math.floor(Math.random() * 15)));
+ /* const click$ = fromEvent(divContainer, "click").pipe(
+    map((event) => handleClick(event,nextFruits.getValue()[4])),
+    tap(()=>{moveNextFruits(nextFruits)})
+  );*/
+   const click$ = fromEvent(divContainer, "click").pipe(
+    withLatestFrom(nextFruits),
+    map(([event,next]) => handleClick(event,next[4])),
+    tap(()=>{moveNextFruits(nextFruits)})
+  );
   const gameLoop$ = gameLoop();
   const gameLoopEventsMerged$ = merge(click$, gameLoop$);
 
@@ -119,7 +129,7 @@ function renderContent() {
   gameLoopEventsMerged$.pipe(
     filter(action => action !== null),   // filter(Boolean)
     withLatestFrom(fruitsBoardSubject),
-    map(([action, fruitsBoard]) => update(fruitsBoard, action)),
+    map(([action, fruitsBoard]) => updateGame(fruitsBoard, action)),
     distinctUntilChanged(),
      tap(fruitsBoard => console.log(fruitsBoard, i++))
   ).subscribe(fruitsBoardSubject);
@@ -132,6 +142,11 @@ function renderContent() {
     //saveData('games',{board:fruitsBoard});
   });
   getData('games').then(data => console.log(data));
+  
+  nextFruits.subscribe(nextFruits => {
+    divContainer.querySelector("#gameData").replaceChildren(renderNextFruits(nextFruits));
+  });
+  //getData('games').then(data => console.log(data));
 
   return divContainer;
 }

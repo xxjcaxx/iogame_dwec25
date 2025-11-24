@@ -2,6 +2,7 @@
 
 
 
+
 .board {
   width: 100%;
   max-width: 750px;
@@ -16,6 +17,7 @@
 }
 
 .cell {
+
   position: relative;
   aspect-ratio: 1 / 1;
   min-width: 0;
@@ -132,4 +134,29 @@
   background: url('/src/imgs/frutes.png') no-repeat;
   background-size: 350px;
   background-position: -290px -140px;
+}
+
+
+.gameData{
+   width: 100%;
+  max-width: 750px;
+  margin: 20px auto;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+  background: #fff;
+
+}
+
+.nextFruitsContainer{
+  display: flex;
+}
+
+.nextFruit{
+  width: 50px;
+}
+
+.nextFruit img {
+  width: 100%;
 }
