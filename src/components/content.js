@@ -163,3 +163,11 @@ function renderContent() {
 
   return divContainer;
 }
+
+
+class gameContent extends HTMLElement {
+    connectedCallback() {
+        this.append(renderContent());
+    }
+}
+customElements.define('game-content', gameContent);

@@ -79,3 +79,11 @@ const renderProfile = () => {
 
   return divProfile;
 };
+
+
+class gameProfile extends HTMLElement {
+    connectedCallback() {
+        this.append(renderProfile());
+    }
+}
+customElements.define('game-profile', gameProfile);

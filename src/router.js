@@ -24,9 +24,9 @@ function router(route,container){
 const routes = new Map([
     ['','game-content'],
     ['#game','game-content'],
-    ['#login',renderLogin('login')],
-    ['#register',renderLogin('register')],
-    ['#profile',renderProfile]
+    ['#login','game-login'],
+    ['#register','game-register'],
+    ['#profile','game-profile']
 ])
 
 

@@ -42,3 +42,17 @@ const  renderLogin =(method)=> ()=> {
     return divLogin;
 
 }
+
+class gameLogin extends HTMLElement {
+    connectedCallback() {
+        this.append(renderLogin('login')());
+    }
+}
+customElements.define('game-login', gameLogin);
+
+class gameRegister extends HTMLElement {
+    connectedCallback() {
+        this.append(renderLogin('register')());
+    }
+}
+customElements.define('game-register', gameRegister);
