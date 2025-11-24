@@ -4,7 +4,7 @@ import { SUPABASE_KEY, SUPABASE_URL } from "../env";
 export { getBearer, headerFactory, fetchSupabase, 
     loginSupabase, registerSupabase, login, 
     register, getData, updateData, updateProfile,
-    getImage, getSession, saveData
+    getImage, getSession, getGames, createGame
  };
 /*
 env.js: 
@@ -146,11 +146,22 @@ const getImage = async (fileUrl) => {
     }
 }
 
-const saveData = async (table, data) => {
-    const result = await fetchSupabase(`${SUPABASE_URL}/rest/v1/${table}`, {
-        method: "PATCH",
+
+const getGames = async () => {
+    const data = await fetchSupabase(`${SUPABASE_URL}/rest/v1/games?select=*`, {
+        method: "get",
+        headers: headerFactory({}),
+    });
+    return data;
+}
+
+const createGame = async (data) => {
+    const result = await fetchSupabase(`${SUPABASE_URL}/rest/v1/games`, {
+        method: "POST",
         headers: headerFactory({ Prefer: "return=representation" }),
         body: JSON.stringify(data)
     });
     return result;
 }
+
+// --- IGNORE ---

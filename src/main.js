@@ -1,5 +1,6 @@
 import "./style.scss"
 import { router } from "./router";
+import "./components/gamesList/gamesList";
 
 // eslint-disable-next-line
 import * as bootstrap from 'bootstrap'

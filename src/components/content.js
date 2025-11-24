@@ -1,5 +1,5 @@
 import { generateFruitsRandomBoard, gameStep, updateGame } from "../gameLogic";
-import { getData } from "../services/supaservice";
+import { getData, getGames, updateData } from "../services/supaservice";
 import { compose } from "../functionals";
 import { BehaviorSubject, from, fromEvent, interval, map, withLatestFrom, merge, filter, tap, distinct, distinctUntilChanged, debounceTime } from "rxjs";
 
@@ -55,7 +55,7 @@ function gameLoop() {
     }))
 }
 
-function handleClick(event,nextFruit) {
+function handleClick(event, nextFruit) {
   if (event.target.tagName === "DIV" && event.target.dataset.position) {
     const action = {
       type: "CLICK_CELL",
@@ -72,16 +72,16 @@ const renderNextFruits = (nextFruits) => {
   divNextFruits.classList.add("nextFruitsContainer")
   divNextFruits.innerHTML = nextFruits.map(
     f => `<div class="nextFruit" data-fruit="${f}">
-    <img src="${fruitsImgs["fruit"+(f)]}">
+    <img src="${fruitsImgs["fruit" + (f)]}">
     </div>`
   ).join('')
   return divNextFruits;
 }
 
-const moveNextFruits = (nextFruits) =>{
+const moveNextFruits = (nextFruits) => {
   const currentNextFruits = [...nextFruits.getValue()];
   currentNextFruits.pop();
-  nextFruits.next([1+Math.floor(Math.random() * 15), ...currentNextFruits]);
+  nextFruits.next([1 + Math.floor(Math.random() * 15), ...currentNextFruits]);
 }
 
 
@@ -89,6 +89,7 @@ function renderContent() {
   ////////// Estat Global controlat (closure d'aquesta funció)
 
   const fruitsBoardSubject = new BehaviorSubject([]);
+  const divContainer = document.createElement("div");
 
   ///// Funcions amb efectes col·laterals controlats
 
@@ -104,48 +105,60 @@ function renderContent() {
 
 
   // Codi principal (main)
+  async function initGame(idGame) {
+    console.log("Iniciant joc per a l'usuari: ", idGame);
+    // Carregar dades del joc des de Supabase
+    const dataGame = await getData('games', { id: idGame });
+    console.log("Dades del joc carregades:", dataGame);
 
-  const fruitsBoardInit = generateFruitsRandomBoard(120);
-   fruitsBoardSubject.next(fruitsBoardInit);
-   const fruitCellsMap = renderCells(fruitsBoardInit);
-   const divContainer = renderTable(fruitCellsMap);
+    // Inicialitzar l'estat del joc
+    const fruitsBoardInit = dataGame[0].game_state;
+    fruitsBoardSubject.next(fruitsBoardInit);
+    const fruitCellsMap = renderCells(fruitsBoardInit);
+    divContainer.replaceChildren(renderTable(fruitCellsMap));
 
- // Els observables
-  const nextFruits = new BehaviorSubject(Array.from({ length: 5 }, ()=> 1+Math.floor(Math.random() * 15)));
- /* const click$ = fromEvent(divContainer, "click").pipe(
-    map((event) => handleClick(event,nextFruits.getValue()[4])),
-    tap(()=>{moveNextFruits(nextFruits)})
-  );*/
-   const click$ = fromEvent(divContainer, "click").pipe(
-    withLatestFrom(nextFruits),
-    map(([event,next]) => handleClick(event,next[4])),
-    tap(()=>{moveNextFruits(nextFruits)})
-  );
-  const gameLoop$ = gameLoop();
-  const gameLoopEventsMerged$ = merge(click$, gameLoop$);
+    // Els observables
+    const nextFruits = new BehaviorSubject(Array.from({ length: 5 }, () => 1 + Math.floor(Math.random() * 15)));
 
-  // implementació del bucle:
-  let i =0;
-  gameLoopEventsMerged$.pipe(
-    filter(action => action !== null),   // filter(Boolean)
-    withLatestFrom(fruitsBoardSubject),
-    map(([action, fruitsBoard]) => updateGame(fruitsBoard, action)),
-    distinctUntilChanged(),
-     tap(fruitsBoard => console.log(fruitsBoard, i++))
-  ).subscribe(fruitsBoardSubject);
+    const click$ = fromEvent(divContainer, "click").pipe(
+      withLatestFrom(nextFruits),
+      map(([event, next]) => handleClick(event, next[4])),
+      tap(() => { moveNextFruits(nextFruits) })
+    );
+    const gameLoop$ = gameLoop();
+    const gameLoopEventsMerged$ = merge(click$, gameLoop$);
 
-  // Refrescar a cada pas
-  fruitsBoardSubject.subscribe(fruitsBoard => refreshCells(fruitsBoard, fruitCellsMap));
+    // implementació del bucle:
+    let i = 0;
+    gameLoopEventsMerged$.pipe(
+      filter(action => action !== null),   // filter(Boolean)
+      withLatestFrom(fruitsBoardSubject),
+      map(([action, fruitsBoard]) => updateGame(fruitsBoard, action)),
+      distinctUntilChanged(),
+      tap(fruitsBoard => console.log(fruitsBoard, i++))
+    ).subscribe(fruitsBoardSubject);
 
-  // Guardar dades a Supabase
-  fruitsBoardSubject.pipe(debounceTime(200)).subscribe(fruitsBoard => {
-    //saveData('games',{board:fruitsBoard});
+    // Refrescar a cada pas
+    fruitsBoardSubject.subscribe(fruitsBoard => refreshCells(fruitsBoard, fruitCellsMap));
+
+    // Guardar dades a Supabase
+    fruitsBoardSubject.pipe(debounceTime(200)).subscribe(fruitsBoard => {
+      updateData('games',idGame,{game_state:fruitsBoard});
+    });
+
+
+    nextFruits.subscribe(nextFruits => {
+      divContainer.querySelector("#gameData").replaceChildren(renderNextFruits(nextFruits));
+    });
+  }
+
+  divContainer.innerHTML = `<game-gameslist></game-gameslist>`;
+
+  divContainer.addEventListener('gameSelected', (event) => {
+    const gameId = event.detail.gameId;
+    initGame(gameId);
   });
-  getData('games').then(data => console.log(data));
-  
-  nextFruits.subscribe(nextFruits => {
-    divContainer.querySelector("#gameData").replaceChildren(renderNextFruits(nextFruits));
-  });
+
   //getData('games').then(data => console.log(data));
 
   return divContainer;
