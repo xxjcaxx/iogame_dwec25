@@ -1,7 +1,7 @@
 import { SUPABASE_KEY, SUPABASE_URL } from "../env";
 export { loginSupabase, registerSupabase, login, 
     register, getData, updateData, updateProfile,
-    getImage, getSession
+    getImage, getSession, saveData
  };
 /*
 env.js: 
@@ -143,4 +143,13 @@ const getImage = async (fileUrl) => {
         }
         return null;
     }
+}
+
+const saveData = async (table, data) => {
+    const result = await fetchSupabase(`${SUPABASE_URL}/rest/v1/${table}`, {
+        method: "PATCH",
+        headers: headerFactory({ Prefer: "return=representation" }),
+        body: JSON.stringify(data)
+    });
+    return result;
 }

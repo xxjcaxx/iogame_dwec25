@@ -1,7 +1,7 @@
 import { generateFruitsRandomBoard, gameStep } from "../gameLogic";
 import { getData } from "../services/supaservice";
 import { compose } from "../functionals";
-import { BehaviorSubject, from, fromEvent, interval, map, withLatestFrom, merge, filter, tap, distinct, distinctUntilChanged } from "rxjs";
+import { BehaviorSubject, from, fromEvent, interval, map, withLatestFrom, merge, filter, tap, distinct, distinctUntilChanged, debounceTime } from "rxjs";
 
 export { renderContent };
 
@@ -126,7 +126,12 @@ function renderContent() {
 
   // Refrescar a cada pas
   fruitsBoardSubject.subscribe(fruitsBoard => refreshCells(fruitsBoard, fruitCellsMap));
-  //getData('games').then(data => console.log(data));
+
+  // Guardar dades a Supabase
+  fruitsBoardSubject.pipe(debounceTime(200)).subscribe(fruitsBoard => {
+    //saveData('games',{board:fruitsBoard});
+  });
+  getData('games').then(data => console.log(data));
 
   return divContainer;
 }
